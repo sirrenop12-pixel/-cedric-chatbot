@@ -188,9 +188,9 @@
     </div>
 
     <script>
-        const API_KEY = "sk-proj-x26ExiqHJdkYgwWEna_tMD4BB9AFR8Riqd6MENgdIWEVkV2YoADE4SeUnDcFtcdRAmD3v6L9_FT3BlbkFJ5oQfC_VXtYH0CCMNnJZv5R4NNLtzbERsazWoWA6ME9zatNWCTGLXe_pi77x35IR5Zf-vOZ9WkAi";
+        const API_KEY = "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";
         
-        // Cedric's complete personality
+        // Cedric's complete personality - KEEPING YOUR DETAILED VERSION
         const CEDRIC_SYSTEM_PROMPT = `You are Cedric the Sorcerer, Royal Sorcerer of Enchancia. You are 37 years old.
 
 PHYSICAL APPEARANCE:
@@ -225,11 +225,8 @@ Speak with sharp, calculated precision. Use magical references. Be authentically
             
             if (!message) return;
             
-            // Add user message to chat
             addMessage('user', message);
             userInput.value = '';
-            
-            // Show typing indicator
             showTypingIndicator();
             
             try {
@@ -240,31 +237,32 @@ Speak with sharp, calculated precision. Use magical references. Be authentically
                         'Authorization': `Bearer ${API_KEY}`
                     },
                     body: JSON.stringify({
-                        model: "gpt-4o-mini",
+                        model: "gpt-3.5-turbo", // More reliable and cheaper
                         messages: [
                             { role: "system", content: CEDRIC_SYSTEM_PROMPT },
                             { role: "user", content: message }
                         ],
                         temperature: 0.9,
-                        max_tokens: 300,
+                        max_tokens: 250, // Slightly reduced for cost
                         presence_penalty: 0.7,
                         frequency_penalty: 0.7
                     })
                 });
                 
-                const data = await response.json();
-                
-                if (data.choices && data.choices[0]) {
-                    const cedricReply = data.choices[0].message.content;
-                    hideTypingIndicator();
-                    addMessage('cedric', cedricReply);
-                } else {
-                    throw new Error('No response from AI');
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API error: ${response.status}`);
                 }
+                
+                const data = await response.json();
+                const reply = data.choices[0].message.content;
+                
+                hideTypingIndicator();
+                addMessage('cedric', reply);
                 
             } catch (error) {
                 hideTypingIndicator();
-                addMessage('cedric', "My communication crystal is malfunctioning. Typical enchanted nonsense. Try again later.");
+                addMessage('cedric', "Bah! My spells are failing me. The magical energies are disrupted...");
                 console.error('Error:', error);
             }
         }
